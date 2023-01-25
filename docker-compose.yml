@@ -1,0 +1,61 @@
+version: '3'
+
+services:
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    tty: true
+    stdin_open: true
+    ports:
+      - 3000:5173
+    volumes:
+      - type: bind
+        source: "./client/src"
+        target: "/usr/app/src"
+    depends_on:
+      - web
+
+  web:
+    container_name: 1q1a_app
+    build: ./app
+    volumes:
+      - type: bind
+        source: ./app/src
+        target: /go/src
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./mysql/.env
+    depends_on:
+      - db
+    networks:
+      - golang_1q1a_app_network
+      
+  db:
+    container_name: 1q1a_db
+    build:
+      context: ./mysql
+      dockerfile: Dockerfile
+    platform: linux/x86_64
+    ports:
+      - 3306:3306
+    env_file:
+      - ./mysql/.env
+    volumes:
+      - type: volume
+        source: mysql_1q1a_app_volume
+        target: /var/lib/mysql
+      - type: bind
+        source: ./mysql/init
+        target: /docker-entrypoint-initdb.d
+    networks:
+      - golang_1q1a_app_network
+
+volumes:
+  mysql_1q1a_app_volume:
+    name: mysql_1q1a_app_volume
+
+networks:
+  golang_1q1a_app_network:
+    external: true
