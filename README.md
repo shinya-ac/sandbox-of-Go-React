@@ -32,13 +32,37 @@ docker-compose up -d
 docker-compose build
 ```
 
+
+アプリコンテナの入り方
+```
+docker psでアプリコンテナのIDを確認
+docker exec -it 6af203f92b0b /bin/bashでコンテナに入る
+```
+
+Goのアプリファイルを編集したのちはアプリコンテナをリスタートする
+`docker-compose restart 1q1a_app`
+
 Dockerファイルをいじった時
 ```
 docker-compose down
-docker images
-docker rmi chat_web
-docker-compose up -d 
-docker-compose build
+docker volume rm mysql_1q1a_app_volume
+docker images　イメージの確認
+docker rmi 1q1a_web
+docker rmi 1q1a_db 
+docker-compose build --no-cache
+docker-compose up
+以下は参考(起動状態の確認)
 docker-compose logs
 docker-compose ps
 ```
+
+ログインする際のリクエストは以下のようにする
+ログイン機能には、以下のようなリクエストを送信することでログインできます。
+* HTTPメソッド: POST
+* URL: /login
+* ボディ:perl
+Copy code{ "email": "example@example.com", "password": "password" } 
+email: ログインに使用するメールアドレス
+* password: ログインに使用するパスワード
+* コンテントタイプ: application/json
+このリクエストを送信すると、サーバーは認証処理を行い、正常にログインできればアクセス用のトークンを返却する。

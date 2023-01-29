@@ -22,7 +22,8 @@ services:
     volumes:
       - type: bind
         source: ./app/src
-        target: /go/src
+        target: /app/src
+    tty: false
     ports:
       - "8080:8080"
     env_file:
