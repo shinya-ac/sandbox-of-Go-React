@@ -5,4 +5,6 @@ WORKDIR /app/src
 
 COPY ./src /app/src
 
+RUN go mod tidy
+
 CMD ["go","run","main.go"]

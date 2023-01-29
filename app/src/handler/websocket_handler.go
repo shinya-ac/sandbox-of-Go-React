@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
-	"github.com/shinya-ac/GoChat/domain"
+	"github.com/shinya-ac/1Q1A/domain"
 )
 
 type WebsocketHandler struct {
