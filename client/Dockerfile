@@ -8,6 +8,7 @@ COPY vite.config.ts /usr/app/
 COPY index.html /usr/app/
 RUN npm i
 RUN npm install react-webcam
+RUN npm install --save axios
 
 EXPOSE 5173
 CMD ["npm", "run", "dev" ]
