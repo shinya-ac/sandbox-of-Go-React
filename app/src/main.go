@@ -36,8 +36,24 @@ func index(w http.ResponseWriter, r *http.Request) {
 //----------以下1Q1Aアプリの実装----------
 
 func home(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("空ページ")
-	fmt.Fprintf(w, "<h1>Hello</h1>")
+	// リクエストヘッダにAccess-Control-Allow-Originを含める
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+
+	// リクエストメソッドがOPTIONSの場合
+	if r.Method == http.MethodOptions {
+		// Access-Control-Allow-MethodsとAccess-Control-Allow-Headersを含める
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	}
+
+	// リクエストメソッドがOPTIONS以外の場合
+	if r.Method != http.MethodOptions {
+		// ここにAPIの処理を記述する
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"message": "HOMEまで辿り着いています"})
+		fmt.Println("空ページ")
+		fmt.Fprintf(w, "<h1>Hello</h1>")
+	}
 }
 
 // 認可機能の本体(ミドルウェア)↓

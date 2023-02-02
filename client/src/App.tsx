@@ -1,6 +1,7 @@
 import { MessageInput } from "./components/MessageInput";
 import { MessageList } from "./components/MessageList";
 import { WebCam } from "./components/WebCam";
+import { TrialReact } from "./components/TrialReact"
 
 export const App = () => {
   return (
@@ -9,6 +10,7 @@ export const App = () => {
       <MessageInput />
       <MessageList />
       <WebCam />
+      <TrialReact />
     </div>
   );
 };
