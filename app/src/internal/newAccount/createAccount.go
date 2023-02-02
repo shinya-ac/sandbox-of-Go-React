@@ -6,7 +6,7 @@ import (
 	dbc "github.com/shinya-ac/1Q1A/dbconnection"
 )
 
-func createAccount(username, password, email string) bool {
+func createAccount(username, email, password string) bool {
 	// パスワードをハッシュ化
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
