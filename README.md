@@ -49,6 +49,7 @@ docker volume rm mysql_1q1a_app_volume
 docker images　イメージの確認
 docker rmi 1q1a_web
 docker rmi 1q1a_db 
+docker rmi 1q1a_client
 docker-compose build --no-cache
 docker-compose up
 以下は参考(起動状態の確認)
@@ -66,3 +67,28 @@ email: ログインに使用するメールアドレス
 * password: ログインに使用するパスワード
 * コンテントタイプ: application/json
 このリクエストを送信すると、サーバーは認証処理を行い、正常にログインできればアクセス用のトークンを返却する。
+
+Reactにパッケージをインストールする方法
+```
+まず安定バージョンを調べる
+miyoshishinya@miyoshishinyanoMacBook-Air-2 client % npm view axios version  
+1.2.6
+
+package.jsonにそのバージョンで記載する
+...
+"dependencies": {
+    "axios": "1.2.6",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    ...
+
+からのnpm install
+miyoshishinya@miyoshishinyanoMacBook-Air-2 client % npm install           
+
+added 9 packages, and audited 120 packages in 895ms
+
+9 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+```
