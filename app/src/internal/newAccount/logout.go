@@ -2,6 +2,7 @@ package signup
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 
@@ -12,10 +13,15 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	// クッキーからセッションIDを取得
 	sessionID, err := r.Cookie("session_id")
 	if err != nil {
-		// セッションが存在しない場合は、ログイン画面にリダイレクト
+		// セッションが存在しない場合は、ログイン画面にリダイレクト（一旦homeにリダイレクトする）
+		// React側の処理もかけたらhomeにリダイレクトではなく失敗をAPIで伝えてReact側でログイン画面に切り替えてもらう
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{"message": "ログアウト失敗・セッションが存在しません"})
+		errMessage := err.Error()
+		errResponse := []byte(`{"error": "` + errMessage + `"}`)
+		w.Write(errResponse)
 		http.Redirect(w, r, "/home", http.StatusSeeOther)
+		log.Printf("クッキーにセッションが存在しません： %s\n", err.Error())
 		return
 	}
 
@@ -27,9 +33,13 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	// セッションIDを持つ（DB内の）セッションを削除
 	_, err = db.Exec("DELETE FROM sessions WHERE sessionID = ?", sessionID.Value)
 	if err != nil {
-		// 削除に失敗した場合はエラーを表示
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{"message": "ログアウト失敗・DBのセッションを削除できませんでした"})
+		errMessage := err.Error()
+		errResponse := []byte(`{"error": "` + errMessage + `"}`)
+		w.Write(errResponse)
+		http.Redirect(w, r, "/home", http.StatusSeeOther)
+		log.Printf("ログアウト失敗・DBのセッションを削除できませんでした： %s\n", err.Error())
 		http.Redirect(w, r, "/home", http.StatusSeeOther)
 		return
 	}

@@ -1,30 +1,32 @@
 package signup
 
 import (
-	"golang.org/x/crypto/bcrypt"
+	"database/sql"
+	"log"
 
-	dbc "github.com/shinya-ac/1Q1A/dbconnection"
+	"golang.org/x/crypto/bcrypt"
 )
 
-func createAccount(username, email, password string) bool {
+func createAccount(tx *sql.Tx, username, email, password string) bool {
 	// パスワードをハッシュ化
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
+		log.Println("パスワードのハッシュ化に失敗")
 		return false
 	}
-	// データベースに接続
-	db := dbc.ConnectDB()
-	defer db.Close()
+
 	// アカウントを作成するためのSQLを作成
-	sql := "INSERT INTO users (username, password, email) VALUES (?, ?, ?)" //まだテーブルが作られていないので動かないと思われる
-	stmt, err := db.Prepare(sql)
+	sql := "INSERT INTO users (username, password, email) VALUES (?, ?, ?)"
+	stmt, err := tx.Prepare(sql)
 	if err != nil {
+		log.Println("SQLクエリ準備中にエラー")
 		return false
 	}
 	defer stmt.Close()
 	// SQLを実行し、アカウントを作成
 	_, err = stmt.Exec(username, hashedPassword, email)
 	if err != nil {
+		log.Println("SQL実行時にエラー：アカウントを作成できませんでした")
 		return false
 	}
 	return true

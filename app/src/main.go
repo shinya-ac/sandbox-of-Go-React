@@ -16,6 +16,7 @@ import (
 	"github.com/shinya-ac/1Q1A/handler"
 	_ "github.com/shinya-ac/1Q1A/handler"
 	na "github.com/shinya-ac/1Q1A/internal/newAccount"
+	q "github.com/shinya-ac/1Q1A/internal/question"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -34,6 +35,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 }
 
 //----------以下1Q1Aアプリの実装----------
+// TODO: リファクタリングをする
 
 func home(w http.ResponseWriter, r *http.Request) {
 	// リクエストヘッダにAccess-Control-Allow-Originを含める
@@ -68,12 +70,12 @@ func auth(next http.HandlerFunc) http.HandlerFunc {
 			http.Redirect(w, r, "/home", http.StatusSeeOther)
 			return
 		}
-		var email string
+		var userId int64
 		// データベースに接続
 		db := dbc.ConnectDB()
 		defer db.Close()
 		//クライアントから受け取ったsessionID情報と一致する値があるかどうかをsessionsテーブルの中で探している。一致したデータがあればそのセッションと対応関係にあるメアドを取得するというコード
-		err = db.QueryRow("SELECT email FROM sessions WHERE sessionID = ?", sessionID.Value).Scan(&email)
+		err = db.QueryRow("SELECT user_id FROM sessions WHERE sessionID = ?", sessionID.Value).Scan(&userId)
 		if err == sql.ErrNoRows {
 			// DBに認可リクエストに対して整合するデータが存在しない場合は、ログイン画面にリダイレクト
 			w.Header().Set("Content-Type", "application/json")
@@ -86,7 +88,7 @@ func auth(next http.HandlerFunc) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		ctx := context.WithValue(r.Context(), "email", email)
+		ctx := context.WithValue(r.Context(), "userId", userId)
 		next.ServeHTTP(w, r.WithContext(ctx))
 
 	}
@@ -95,13 +97,14 @@ func auth(next http.HandlerFunc) http.HandlerFunc {
 // 認可機能確認のためのエンドポイント
 func isAuthorized(w http.ResponseWriter, r *http.Request) {
 	// requestからcontextを取得（認可機能で認可されたユーザーのemailを取得）
-	email := r.Context().Value("email").(string)
+	//email := r.Context().Value("email").(string)
+	userId := r.Context().Value("userId").(int64)
 	//w.Write([]byte("Hello, " + email))
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"message": "認可成功"})
 	fmt.Println("認可実験・これが表示されていれば認可機能が機能している")
-	fmt.Fprintf(w, "<h1>Hello %s さん</h1>", email)
+	fmt.Fprintf(w, "<h1>Hello %v さん</h1>", userId)
 }
 
 func main() {
@@ -126,6 +129,7 @@ func main() {
 	//以下のisAuthorizedというエンドポイントは「ログイン済みのユーザー」のみがアクセスできるようにしたいので
 	//authというログインを確認するミドルウェアを噛ませている
 	http.HandleFunc("/isAuthorized", auth(isAuthorized))
+	http.HandleFunc("/question", auth(q.QuestionHandler))
 
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Panicln("Serve Error:", err)
@@ -134,13 +138,9 @@ func main() {
 
 }
 
-//ログイン・認証関連の未実装機能
-//現状、セッションの保存が「セッションID↔️メアド」という対応になっている
-//メアドも一意な数字だからこれでもいいけど「セッションID↔️ユーザーID」の方が何かとその後の実装が便利だからそうする
+// TODO:永続セッション機能（remember me機能・ログアウトしない限りブラウザを閉じてもログインが保持される機能）の実装もする
 
-//永続セッション機能（remember me機能・ログアウトしない限りブラウザを閉じてもログインが保持される機能）の実装もする
+// TODO:ユーザーの登録機能は作ったけど変更・削除機能・ユーザー情報の閲覧機能もまだ
+// TODO:メアドによるアカウント有効化機能（受信ボックスのリンクをクリックしてもらう機能）もまだ
 
-//ユーザーの登録機能は作ったけど変更・削除機能・ユーザー情報の閲覧機能もまだ
-//メアドによるアカウント有効化機能（受信ボックスのリンクをクリックしてもらう機能）もまだ
-
-//上記によるパスワードの再設定機能もまだ
+// 上記によるパスワードの再設定機能もまだ
