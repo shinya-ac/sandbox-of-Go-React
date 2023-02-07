@@ -1,23 +1,9 @@
-import { useMessageList } from "../hooks/use-message-list";
+import { Link, useHistory } from "react-router-dom"
 import axios from "axios";
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import { UserContext } from "../providers/UserProvider";
 
 export const TrialReact = () => {
-    const onClickUsers = () =>{
-        //axios.httpメソッド名("リクエストを送るエンドポイント").then((リクエストが返却された後の返り値、つまり「result」) => {返却された後の処理})
-        axios.get("https://jsonplaceholder.typicode.com/users").then((result: any) => {
-            console.log(result)
-        }).catch((err) => {console.log(err)});;
-        alert("users");
-    }
-
-    const onClickUser1 = () =>{
-        axios.get("https://jsonplaceholder.typicode.com/users/3").then((result: any) => {
-            console.log(result)
-        }).catch((err) => {console.log(err)});;
-        alert("user1");
-    }
-
     // フォームの入力値を保持する state
   const [username, setUserName]: [string, React.Dispatch<React.SetStateAction<string>>] = useState("hogeter");
   const [email, setEmail]: [string, React.Dispatch<React.SetStateAction<string>>] = useState("hogeter@example.com");
@@ -34,13 +20,20 @@ export const TrialReact = () => {
     setUserName(e.target.value);
   };
 
+  // 以下はグローバルなstateであるuserInfo(UserProvider.tsx内)の状態を変化させる
+  // setUserInfoメソッドをグローバルstateを扱うUseContextから取ってきているコード
+  //stateはLintエラーが出てるけど一旦無視でおけ
+  const { userInfo, setUserInfo } = useContext(UserContext);
+
   const onClickSignUp = (username: string, email: string, password: string) => {
     axios.post("http://localhost:8080/signup", {username, email, password})
     .then((result: any) => {
         console.log(result.data)
         console.log(result.data.username)
         setUserName(result.data.username);
+        setUserInfo({name: "signUped Hogeter"})
         console.log(result.data)
+        console.log(userInfo)
     })
     .catch((err) => {console.log(err)});
 };
@@ -49,11 +42,31 @@ export const TrialReact = () => {
     onClickSignUp(username, email, password)
   };
 
+  //無意味な100件の配列
+  const arr = [...Array(100).keys()];
+
+  //素のjsでReactのルーティングに画面遷移するには以下のように書く
+  //Linkでいう「to="/hoge"」のhogeの箇所を以下のpush内に記述する
+  const history = useHistory();
+  const onClickTrial500 = () => history.push("/trial/500");
+
   return (
+   
     <>
         <div>
-        <button onClick={onClickUsers}>users</button>
-        <button onClick={onClickUser1}>user1</button>
+        <Link to="/trial/1">users</Link>
+        <br />
+        <Link to="/trial/2">user3</Link>
+        <br />
+        <Link to="/trial/500">URL Parameter</Link>
+        <br />
+        <Link to="/trial/500?name=hoge">Query Parameter</Link>
+        <br />
+        {/* 無意味なarrという配列（state）を渡してページ遷移 */}
+        <Link to={{pathname: "/trial/500", state: arr}}>URL Parameter Page with State(無意味な配列)</Link>
+        <br />
+        {/* Linkを用いずに素のjsの遷移で「"/trial/500"」というリンクに遷移するには以下のように書く */}
+        <button onClick={onClickTrial500}>trial/500</button>
         <form onSubmit={handleSubmit}>
             <div>
                 <label htmlFor="user-name">UserName:</label>
