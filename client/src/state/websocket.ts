@@ -26,6 +26,8 @@ const connectWebsocketSelector = selector({
   },
 });
 
+// 以下はRecoilで「websocket」というグローバルなstateを定義しているコード
+// 初期値には「connectWebsocketSelector」を入れている
 export const websocketAtom = atom<WebSocket.w3cwebsocket>({
   key: "websocket",
   default: connectWebsocketSelector,

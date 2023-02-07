@@ -4,6 +4,7 @@ import { RecoilRoot } from "recoil";
 import { App } from "./App";
 
 
+// 以下のように「RecoilRoot」で囲った範囲の中でRecoilで定義したグローバルなstateを扱うことができる
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <RecoilRoot>
@@ -11,7 +12,3 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     </RecoilRoot>
   </React.StrictMode>
 );
-//2023/01/09
-//Simple chatのページを開くところまでは実装できた
-//ただバックエンド側の実装がメッセージ使用になりきっていないので、バックエンドの実装を変える必要がある
-//からのその実装したバックエンドとこのSimpleChatのページとがwebsocketで連携できているか確認する
