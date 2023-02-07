@@ -57,6 +57,27 @@ docker-compose logs
 docker-compose ps
 ```
 
+`docker-compose up`時にmysqlの以下のエラーが出たとき
+```
+/docker-entrypoint-initdb.d/02-create_question_table.sh: /bin/sh: bad interpreter: Permission denied
+```
+対処法：該当ファイルのパーミッションを以下のように変更する
+```
+cd mysql
+chmod 645 ./init/02-create_question_table.sh
+```
+以下のような権限になっていることを確認する
+```
+mysql % ls -la init                            
+drwxr--r-x  7 hoge  staff  224  2  5 15:54 .
+drwxr-xr-x  6 hoge  staff  192  2  5 15:54 ..
+-rwxr-xr-x  1 hoge  staff  334  2  5 15:54 01-create_users_table.sh
+-rw-r--r--  1 hoge  staff  334  2  5 15:54 02-create_question_table.sh
+-rw-r--r-x  1 hoge  staff  436  2  5 15:54 03-create_answer_table.sh
+-rwxr-xr-x  1 hoge  staff  280  2  5 15:54 create_session_table.sh
+-rw-r--r-x  1 hoge  staff  396  1 27 02:53 create_table.sh
+```
+
 ログインする際のリクエストは以下のようにする
 ログイン機能には、以下のようなリクエストを送信することでログインできます。
 * HTTPメソッド: POST
@@ -70,9 +91,13 @@ email: ログインに使用するメールアドレス
 
 Reactにパッケージをインストールする方法
 ```
+cd client
 まず安定バージョンを調べる
-miyoshishinya@miyoshishinyanoMacBook-Air-2 client % npm view axios version  
+npm view axios version  
 1.2.6
+
+以下のコマンドならより詳細に調べることができる
+npm info react-router-dom
 
 package.jsonにそのバージョンで記載する
 ...
@@ -83,7 +108,7 @@ package.jsonにそのバージョンで記載する
     ...
 
 からのnpm install
-miyoshishinya@miyoshishinyanoMacBook-Air-2 client % npm install           
+npm install           
 
 added 9 packages, and audited 120 packages in 895ms
 
