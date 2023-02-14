@@ -10,16 +10,23 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "react-router-dom": "5.3.4",
+    "@chakra-ui/icons": "1.1.7",
+    "@chakra-ui/react": "1.8.9",
+    "@emotion/react": "11.10.4",
+    "@emotion/styled": "11.10.5",
     "axios": "1.2.6",
+    "framer-motion": "6.4.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-router-dom": "5.3.4",
     "recoil": "^0.7.4",
-    "websocket": "^1.0.34"
+    "websocket": "^1.0.34",
+    "react-webcam": "7.0.1"
   },
   "devDependencies": {
     "@types/react": "^18.0.15",
     "@types/react-dom": "^18.0.6",
+    "@types/react-router-dom": "^5.3.3",
     "@types/websocket": "^1.0.5",
     "@vitejs/plugin-react": "^2.0.0",
     "typescript": "^4.6.4",
