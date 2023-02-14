@@ -3,9 +3,12 @@ import React, { useContext } from "react"
 import { UserContext } from "../providers/UserProvider";
 
 export const TrialParams = () =>{
+    interface UserParams {
+        id: string;
+      }
     //TrialRoutes.tsxで「/:id」という名前でurlパラメーターを受け取っているので
     //useParamsではidを受け取るような記述を書く
-    const { id } = useParams();
+    const { id } = useParams<UserParams>();
     const location = useLocation();
     console.log(location)
     //useLocationはQueryパラメーター（URLの「?hogehoge」の部分）を扱えるもの
