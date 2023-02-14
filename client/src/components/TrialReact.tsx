@@ -1,4 +1,4 @@
-import { Link, useHistory } from "react-router-dom"
+import { Link, useHistory } from "react-router-dom";
 import axios from "axios";
 import React, { useState, useContext } from 'react';
 import { UserContext } from "../providers/UserProvider";
@@ -23,17 +23,32 @@ export const TrialReact = () => {
   // 以下はグローバルなstateであるuserInfo(UserProvider.tsx内)の状態を変化させる
   // setUserInfoメソッドをグローバルstateを扱うUseContextから取ってきているコード
   //stateはLintエラーが出てるけど一旦無視でおけ
+  interface UserContextType {
+    userInfo: any;
+    setUserInfo: (info: any) => void;
+  }
+  
+  const UserContext = React.createContext<UserContextType>({
+    userInfo: {},
+    setUserInfo: () => {},
+  });
+
   const { userInfo, setUserInfo } = useContext(UserContext);
+
+  interface UserData {
+    username: string;
+  }
 
   const onClickSignUp = (username: string, email: string, password: string) => {
     axios.post("http://localhost:8080/signup", {username, email, password})
     .then((result: any) => {
-        console.log(result.data)
-        console.log(result.data.username)
+        console.log(userInfo);
+        console.log(result.data);
+        console.log(result.data.username);
         setUserName(result.data.username);
-        setUserInfo({name: "signUped Hogeter"})
-        console.log(result.data)
-        console.log(userInfo)
+        setUserInfo({username: "signUped Hogeter"});
+        console.log(result.data);
+        console.log(userInfo.username);
     })
     .catch((err) => {console.log(err)});
 };
