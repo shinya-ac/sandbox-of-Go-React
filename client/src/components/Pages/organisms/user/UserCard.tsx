@@ -25,18 +25,18 @@ export const UserCard: VFC<Props> = memo((props) => {
                 _hover={{cursor: "pointer", opacity:0.8}}
                 onClick={() => onClick(id)}
                 >
-                    <Stack textAlign="center">
-                        <Image 
-                        boxSize="160px" 
-                        borderRadius="full" 
-                        alt={userName}
-                        m="auto"  
-                        src={imageUrl}
-                        />
-                        <Text fontSize="lg" fontWeight="bold">{userName}</Text>
-                        <Text fontSize="lg" color="gray"> {fullName}</Text>
-                    </Stack>
-                </Box>
+                <Stack textAlign="center">
+                    <Image 
+                    boxSize="160px" 
+                    borderRadius="full" 
+                    alt={userName}
+                    m="auto"  
+                    src={imageUrl}
+                    />
+                    <Text fontSize="lg" fontWeight="bold">{userName}</Text>
+                    <Text fontSize="lg" color="gray"> {fullName}</Text>
+                </Stack>
+            </Box>
         </>
     )
 });

@@ -10,6 +10,7 @@ import { Login } from "../components/Pages/Login";
 import { HomeRoutes } from "./HomeRoutes";
 import { HeaderLayout } from "../components/Pages/template/HeaderLayout";
 import { LoginUserProvider } from "../providers/LoginUserProvider"
+import { FolderRoutes } from "./FolderRoute";
 
 
 
@@ -20,9 +21,41 @@ export const Router = memo(() => {
         <Route exact path="/">
           <Login />
         </Route>
+        <Route 
+          path="/trial"
+          render={( { match: { url } } ) => (
+            <Switch>
+              { TrialRoutes.map((route) => (
+                <Route
+                    key={route.path}
+                    exact={route.exact}
+                    path={`${url}${route.path}`}
+                >
+                    {route.children}
+                </Route>
+              )) }
+            </Switch>
+          )}
+      >
+      </Route>
         <Route path="/home" render={({ match: { url } }) => (
           <Switch>
             {HomeRoutes.map((route) => (
+              <Route
+              key={route.path}
+              exact={route.exact}
+              path={`${url}${route.path}`}
+              >
+                <HeaderLayout>{route.children}</HeaderLayout>
+              </Route>
+            ))}
+          </Switch>
+        )}
+        />
+
+        <Route path="/folders" render={({ match: { url } }) => (
+          <Switch>
+            {FolderRoutes.map((route) => (
               <Route
               key={route.path}
               exact={route.exact}
@@ -39,6 +72,8 @@ export const Router = memo(() => {
         <Route path="*">
           <Page404 />
         </Route>
+
+        
       </Switch>
     );
 });

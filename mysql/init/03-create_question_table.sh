@@ -5,6 +5,8 @@ $CMD_MYSQL -e "CREATE TABLE questions (
   id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
   user_id INT NOT NULL,
   question_content TEXT NOT NULL,
+  folder_id INT NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(ID)
+  FOREIGN KEY (user_id) REFERENCES users(ID),
+  FOREIGN KEY (folder_id) REFERENCES folders(id)
 );"
