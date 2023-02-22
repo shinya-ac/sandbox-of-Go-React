@@ -13,6 +13,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 
 	// リクエストヘッダにAccess-Control-Allow-Originを含める
 	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
 
 	// リクエストメソッドがOPTIONSの場合
 	if r.Method == http.MethodOptions {
@@ -94,6 +95,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 					log.Printf("トランザクションのコミットに失敗: %v", err)
 					return
 				}
+				w.Header().Set("Access-Control-Allow-Credentials", "true")
 				w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
 				w.Header().Set("Content-Type", "application/json")
 				json.NewEncoder(w).Encode(map[string]string{"message": "サインアップに成功しました", "username": user.Username})

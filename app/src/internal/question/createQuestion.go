@@ -1,13 +1,14 @@
 package question
 
 import (
+	"database/sql"
 	"log"
 
 	dbc "github.com/shinya-ac/1Q1A/dbconnection"
 )
 
 // TODO: ロールバック処理を書く
-func createQuestion(question_content string, userId int64) bool {
+func createQuestion(question_content string, userId int64, folderId int64) bool {
 	// データベースに接続
 	db := dbc.ConnectDB()
 	defer db.Close()
@@ -19,7 +20,7 @@ func createQuestion(question_content string, userId int64) bool {
 	}
 	defer tx.Rollback()
 
-	sql := "INSERT INTO questions (question_content, user_id)          VALUES (?, ?)"
+	sql := "INSERT INTO questions (question_content, user_id, folder_id)          VALUES (?, ?, ?)"
 
 	stmt, err := tx.Prepare(sql)
 	if err != nil {
@@ -28,7 +29,7 @@ func createQuestion(question_content string, userId int64) bool {
 	}
 	defer stmt.Close()
 	// SQLを実行し、セッションを保存
-	res, err := stmt.Exec(question_content, userId)
+	res, err := stmt.Exec(question_content, userId, folderId)
 	if err != nil {
 		log.Println("SQL実行中にエラー")
 		return false
@@ -42,7 +43,7 @@ func createQuestion(question_content string, userId int64) bool {
 	}
 
 	answer := "質問の答え"
-	_, err = tx.Exec("INSERT INTO answers (answer_content, question_id, user_id) VALUES (?, ?, ?)", answer, questionID, userId)
+	_, err = tx.Exec("INSERT INTO answers (answer_content, question_id, user_id, folder_id) VALUES (?, ?, ?, ?)", answer, questionID, userId, folderId)
 	if err != nil {
 		log.Printf("解答データインサート中にエラー: %v", err)
 		return false
@@ -56,4 +57,34 @@ func createQuestion(question_content string, userId int64) bool {
 	}
 
 	return true
+}
+
+func ReadQuestions(userId int64, folderId int64) (*sql.Rows, error) {
+	// データベースに接続
+	db := dbc.ConnectDB()
+	defer db.Close()
+
+	query := `
+		SELECT q.id AS question_id, q.question_content AS question_content,
+			a.id AS answer_id, a.answer_content AS answer_content
+		FROM questions q
+		LEFT JOIN answers a ON q.id = a.question_id
+		WHERE q.folder_id = ? AND q.user_id = ? AND a.user_id = ?
+	`
+
+	stmt, err := db.Prepare(query)
+	if err != nil {
+		log.Printf("SQL準備中にエラー: %v", err)
+		return nil, err
+	}
+	defer stmt.Close()
+
+	// SQLを実行し、セッションを保存
+	rows, err := stmt.Query(folderId, userId, userId)
+	if err != nil {
+		log.Println("SQL実行中にエラー")
+		return nil, err
+	}
+
+	return rows, nil
 }
