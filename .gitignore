@@ -24,3 +24,5 @@ dist-ssr
 *.sw?
 
 *.env
+
+app/src/internal/sample_sql/*

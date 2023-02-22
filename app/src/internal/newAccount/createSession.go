@@ -13,12 +13,19 @@ func createSession(tx *sql.Tx, w http.ResponseWriter, r *http.Request, user_id i
 	// セッションIDを生成
 	sessionID := uuid.New().String()
 
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+
 	// セッションIDをCookieに設定（セッション保持期限は24時間）
+	// SecureとhttpOnly属性がないとReactのクライアントからはログイン後にSessionが保存されないけど
+	// でもSecureあればPostmanからのログイン後のセッションの読み取りが拒否されるという難しさ
 	http.SetCookie(w, &http.Cookie{
-		Name:    "session_id",
-		Value:   sessionID,
-		Path:    "/",
-		Expires: time.Now().Add(time.Hour * 24),
+		Name:     "session_id",
+		Value:    sessionID,
+		Path:     "/",
+		Expires:  time.Now().Add(time.Hour * 24),
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
 	})
 	// セッションIDとemailをデータベースに保存
 	if saveSessionToDB(tx, sessionID, user_id) {

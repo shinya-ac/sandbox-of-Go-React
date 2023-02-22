@@ -15,6 +15,7 @@ import (
 	"github.com/shinya-ac/1Q1A/domain"
 	"github.com/shinya-ac/1Q1A/handler"
 	_ "github.com/shinya-ac/1Q1A/handler"
+	f "github.com/shinya-ac/1Q1A/internal/folder"
 	na "github.com/shinya-ac/1Q1A/internal/newAccount"
 	q "github.com/shinya-ac/1Q1A/internal/question"
 
@@ -60,37 +61,52 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 // 認可機能の本体(ミドルウェア)↓
 var sessions = map[string]string{} // セッションIDをキーにして、ログインしているユーザーのemailを保存している
+
 func auth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		sessionID, err := r.Cookie("session_id")
-		if err != nil {
-			// セッションが存在しない場合は、ログイン画面にリダイレクト
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(map[string]string{"message": "認可失敗・セッションが存在しません"})
-			http.Redirect(w, r, "/home", http.StatusSeeOther)
-			return
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		// リクエストメソッドがOPTIONSの場合
+		if r.Method == http.MethodOptions {
+			// Access-Control-Allow-MethodsとAccess-Control-Allow-Headersを含める
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 		}
-		var userId int64
-		// データベースに接続
-		db := dbc.ConnectDB()
-		defer db.Close()
-		//クライアントから受け取ったsessionID情報と一致する値があるかどうかをsessionsテーブルの中で探している。一致したデータがあればそのセッションと対応関係にあるメアドを取得するというコード
-		err = db.QueryRow("SELECT user_id FROM sessions WHERE sessionID = ?", sessionID.Value).Scan(&userId)
-		if err == sql.ErrNoRows {
-			// DBに認可リクエストに対して整合するデータが存在しない場合は、ログイン画面にリダイレクト
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(map[string]string{"message": "認可失敗・セッションリクエストと一致するセッションデータがありません"})
-			http.Redirect(w, r, "/home", http.StatusSeeOther)
-			return
-		} else if err != nil {
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(map[string]string{"message": "認可失敗・セッションSQLを実行した後にエラーが出ました"})
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		ctx := context.WithValue(r.Context(), "userId", userId)
-		next.ServeHTTP(w, r.WithContext(ctx))
+		// リクエストメソッドがOPTIONS以外の場合
+		if r.Method != http.MethodOptions {
+			// ここにAPIの処理を記述する
 
+			sessionID, err := r.Cookie("session_id")
+			if err != nil {
+				log.Fatalf("session %v", err)
+				// セッションが存在しない場合は、ログイン画面にリダイレクト
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode(map[string]string{"message": "認可失敗・セッションが存在しません"})
+				http.Redirect(w, r, "/home", http.StatusSeeOther)
+				return
+			}
+			var userId int64
+			// データベースに接続
+			db := dbc.ConnectDB()
+			defer db.Close()
+			//クライアントから受け取ったsessionID情報と一致する値があるかどうかをsessionsテーブルの中で探している。一致したデータがあればそのセッションと対応関係にあるメアドを取得するというコード
+			err = db.QueryRow("SELECT user_id FROM sessions WHERE sessionID = ?", sessionID.Value).Scan(&userId)
+			if err == sql.ErrNoRows {
+				// DBに認可リクエストに対して整合するデータが存在しない場合は、ログイン画面にリダイレクト
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode(map[string]string{"message": "認可失敗・セッションリクエストと一致するセッションデータがありません"})
+				http.Redirect(w, r, "/home", http.StatusSeeOther)
+				return
+			} else if err != nil {
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode(map[string]string{"message": "認可失敗・セッションSQLを実行した後にエラーが出ました"})
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			ctx := context.WithValue(r.Context(), "userId", userId)
+			next.ServeHTTP(w, r.WithContext(ctx))
+
+		}
 	}
 }
 
@@ -129,7 +145,14 @@ func main() {
 	//以下のisAuthorizedというエンドポイントは「ログイン済みのユーザー」のみがアクセスできるようにしたいので
 	//authというログインを確認するミドルウェアを噛ませている
 	http.HandleFunc("/isAuthorized", auth(isAuthorized))
+
+	// 質問作成エンドポイント（RESTにするかどうか検討中）
 	http.HandleFunc("/question", auth(q.QuestionHandler))
+
+	// フォルダー作成エンドポイント（RESTにするかどうか検討中）
+	http.HandleFunc("/folder", auth(f.FolderHandler))
+	// フォルダー内質問一覧閲覧エンドポイント（RESTにするかどうか検討中）
+	http.HandleFunc("/folders/", auth(q.FolderReadHandler))
 
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Panicln("Serve Error:", err)

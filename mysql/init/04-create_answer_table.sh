@@ -6,8 +6,10 @@ $CMD_MYSQL -e "CREATE TABLE answers (
   question_id INT NOT NULL,
   user_id INT NOT NULL,
   answer_content TEXT NOT NULL,
+  folder_id INT NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(ID),
   FOREIGN KEY (question_id) REFERENCES questions(ID),
+  FOREIGN KEY (folder_id) REFERENCES folders(id),
   UNIQUE (question_id)
 );"
