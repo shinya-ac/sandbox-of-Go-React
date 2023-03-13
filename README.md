@@ -117,3 +117,5 @@ added 9 packages, and audited 120 packages in 895ms
 
 found 0 vulnerabilities
 ```
+
+config.iniは誰かからもらう

@@ -1,3 +1,4 @@
+import { CreateQA } from "../components/Pages/CreateQA";
 import { Home } from "../components/Pages/Home";
 import { Page404 } from "../components/Pages/Page404";
 import { Setting } from "../components/Pages/Setting";
@@ -9,6 +10,9 @@ export const HomeRoutes = [
         {path: "/",
         exact: true,
         children: <Home />},
+        {path: "/create_qa/:Id",
+        exact: false,
+        children: <CreateQA />},
         {path: "/user_management",
         exact: false,
         children: <UserManagement />},

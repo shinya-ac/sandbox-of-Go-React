@@ -1,14 +1,13 @@
-import { Box, Center, Flex, Spacer, Spinner, Wrap, WrapItem } from "@chakra-ui/react";
-import { memo, useEffect, useState } from "react"
-import { useParams } from "react-router-dom";
+import { Link, Box, Center, Flex, Spacer, Spinner, Wrap, WrapItem } from "@chakra-ui/react";
+import { memo, SetStateAction, useCallback, useEffect, useState } from "react"
+import {  useHistory, useParams } from "react-router-dom";
 import { useAllQAs } from "../../../../hooks/useAllQAs";
 import { AnswerCard } from "./AnswerCard";
 import { QuestionCard } from "./QuestionCard";
 import ReactPaginate from 'react-paginate';
 import { css } from "@emotion/react";
 import { PaginationContainer } from "../../../molecules/Paginate";
-
-const PAGE_SIZE = 1; // 1ページあたりのアイテム数
+import { PrimaryButton } from "../../../atoms/buttons/PrimaryButton";
 
 const pagingStyle = css`
     display: flex;
@@ -35,38 +34,56 @@ export const QA  = memo(() => {
     const { folderId } = useParams<FolderParams>();
     const numFolderId = Number(folderId);// FolderIdはparamsとしてはstringだけど数値として扱いたいので型変換
     const { getQAs, loading, qas } = useAllQAs(numFolderId);
-    useEffect(() => getQAs(), [getQAs])
+    // useCallbackを使用してgetQAsをキャッシュ
+    const memoizedGetQAs = useCallback(() => getQAs(), []);
+    useEffect(() => memoizedGetQAs(), []);
 
+    const PAGE_SIZE = 1; // 1ページあたりのアイテム数
     const [currentPage, setCurrentPage] = useState(0);
     const itemsOnPage = qas.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
     const pageCount = Math.ceil(qas.length / PAGE_SIZE);
 
     const [showAnswer, setShowAnswer] = useState(false);
-    const toggleAnswer = () => setShowAnswer(!showAnswer);
-    const toggleToQuestion = () => setShowAnswer(false);
+    const toggleAnswer = useCallback(() => setShowAnswer((prevShowAnswer) => !prevShowAnswer), []);
+
+    const toggleToQuestion = useCallback(() => setShowAnswer(false), [showAnswer]);
+
+
+    const history = useHistory();
+    const onClickCreateQA = useCallback(() => history.push(`/home/create_qa/${folderId}`), [history]);
+
+    const handlePageChange = useCallback((data: { selected: SetStateAction<number>; }) => {
+        setCurrentPage(data.selected);
+    }, [])
     
     return(
         <>
-            <p>QAページです</p>
+            <p>QAページです</p>{console.log("再レンダリングされました")}
             {loading ? (
                 <Center h="100vh">
                     <Spinner />
                 </Center>
                 ) : (
                 <>
+                <Flex align="center" justify="center" height="10vh">
+                    <PrimaryButton onClick={onClickCreateQA}>
+                        <Box pr={4}>
+                            <Link>一問一答作成</Link>
+                        </Box>
+                    </PrimaryButton>
+                </Flex>
+                    
                 <Wrap p={{ base: 4, md:10 }} spacing='30px' justify="center" align='left'>
                     {itemsOnPage.map((qa) => (
                         <WrapItem key={`${qa.question_content}-${qa.answer_content}`} mx="auto">
                             {showAnswer
                                 ? <AnswerCard id={qa.aid} answer_content={qa.answer_content} onClick={toggleAnswer} />
                                 : <QuestionCard id={qa.qid} question_content={qa.question_content} onClick={toggleAnswer} />}
-                            {/* <QuestionCard id={qa.qid} question_content={qa.question_content}></QuestionCard>
-                            <AnswerCard id={qa.aid} answer_content={qa.answer_content}></AnswerCard> */}
                         </WrapItem>
                     ))}
                 </Wrap>
                 <PaginationContainer>
-                    <ReactPaginate
+                {qas.length ? <ReactPaginate
                     onClick={toggleToQuestion}
                     previousLabel="<<<前の単語"
                     nextLabel="次の単語>>>"
@@ -74,7 +91,7 @@ export const QA  = memo(() => {
                     pageCount={pageCount}
                     marginPagesDisplayed={2}
                     pageRangeDisplayed={5}
-                    onPageChange={(data) => setCurrentPage(data.selected)}
+                    onPageChange={handlePageChange}
                     containerClassName="pagination"
                     activeClassName="active"
                     pageClassName="page-item"
@@ -86,7 +103,7 @@ export const QA  = memo(() => {
                     nextLinkClassName="page-link"
                     breakLinkClassName="page-link"
                     disabledClassName='disabled'
-                    />
+                    />: null}
                 </PaginationContainer>
               </>
             )}

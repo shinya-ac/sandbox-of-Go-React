@@ -1,7 +1,4 @@
 import { Switch, Route, } from "react-router-dom"
-import { MessageInput } from "../components/MessageInput";
-import { MessageList } from "../components/MessageList";
-import { WebCam } from "../components/WebCam";
 import { Page404 } from "../components/Pages/Page404"
 import { TrialRoutes } from "./TrialRoutes";
 
