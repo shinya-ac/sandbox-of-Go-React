@@ -16,6 +16,7 @@ import (
 	"github.com/shinya-ac/1Q1A/handler"
 	_ "github.com/shinya-ac/1Q1A/handler"
 	f "github.com/shinya-ac/1Q1A/internal/folder"
+	i "github.com/shinya-ac/1Q1A/internal/image"
 	na "github.com/shinya-ac/1Q1A/internal/newAccount"
 	q "github.com/shinya-ac/1Q1A/internal/question"
 
@@ -46,7 +47,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodOptions {
 		// Access-Control-Allow-MethodsとAccess-Control-Allow-Headersを含める
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, FolderId")
 	}
 
 	// リクエストメソッドがOPTIONS以外の場合
@@ -70,7 +71,7 @@ func auth(next http.HandlerFunc) http.HandlerFunc {
 		if r.Method == http.MethodOptions {
 			// Access-Control-Allow-MethodsとAccess-Control-Allow-Headersを含める
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
-			w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, FolderId")
 		}
 		// リクエストメソッドがOPTIONS以外の場合
 		if r.Method != http.MethodOptions {
@@ -154,16 +155,11 @@ func main() {
 	// フォルダー内質問一覧閲覧エンドポイント（RESTにするかどうか検討中）
 	http.HandleFunc("/folders/", auth(q.FolderReadHandler))
 
+	http.HandleFunc("/convertImage", auth(i.ConvertImageHandler))
+
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Panicln("Serve Error:", err)
 	}
 	fmt.Println("webサーバー起動終了")
 
 }
-
-// TODO:永続セッション機能（remember me機能・ログアウトしない限りブラウザを閉じてもログインが保持される機能）の実装もする
-
-// TODO:ユーザーの登録機能は作ったけど変更・削除機能・ユーザー情報の閲覧機能もまだ
-// TODO:メアドによるアカウント有効化機能（受信ボックスのリンクをクリックしてもらう機能）もまだ
-
-// 上記によるパスワードの再設定機能もまだ

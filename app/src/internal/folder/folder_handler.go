@@ -17,7 +17,7 @@ func FolderHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodOptions {
 		// Access-Control-Allow-MethodsとAccess-Control-Allow-Headersを含める
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, FolderId")
 	}
 
 	// リクエストメソッドがOPTIONS以外の場合

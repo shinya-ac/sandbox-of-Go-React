@@ -12,7 +12,7 @@ type Props = {
 
 
 export const MenuDrawer: VFC<Props> = memo((props) => {
-    const { isOpen, onClose,onClickHome, onClickUserManagement, onClickSetting } = props;
+    const { isOpen, onClose,onClickHome, onClickUserManagement, onClickSetting, } = props;
     return (
         <>
             <Drawer placement="left" size="xs" isOpen={isOpen} onClose={onClose}>

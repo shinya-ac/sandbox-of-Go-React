@@ -26,3 +26,5 @@ dist-ssr
 *.env
 
 app/src/internal/sample_sql/*
+
+config.ini
