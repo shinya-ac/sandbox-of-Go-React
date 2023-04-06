@@ -50,6 +50,7 @@ func QuestionHandler(w http.ResponseWriter, r *http.Request) {
 		//openAIからbody内の本文を元に質問と解答を作成
 		questionContents, answerContents := CallOpenAI(string(body))
 		//questionBytes := []byte(questionJSON)
+		fmt.Printf("OpenAIからのレス：%v\n", questionContents)
 
 		// スライスをQuestion構造体のスライスに変換する
 		var questions []Question

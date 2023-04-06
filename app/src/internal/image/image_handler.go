@@ -74,7 +74,9 @@ func ConvertImageHandler(w http.ResponseWriter, r *http.Request) {
 
 		// 画像を文字に変換
 		// detectedStr := DetectString("image.jpg")　こっちが本番用
-		detectedStr := DetectString("img.png")
+		// detectedStr := DetectString("img.png")　こっちはテスト用（どんな写真入れても決めうちで文字付きの写真が送信される）
+		detectedStr := DetectString("image.jpg")
+
 		if len(detectedStr) == 0 {
 			log.Println("文字は空")
 			http.Error(w, "文字は何も読み取れませんでした", http.StatusInternalServerError)
