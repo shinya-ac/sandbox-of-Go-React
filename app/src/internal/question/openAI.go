@@ -31,27 +31,32 @@ func CallOpenAI(texts string) ([]string, []string) {
 	}
 	request, err := http.NewRequest("POST", "https://api.openai.com/v1/completions", bytes.NewBuffer(requestBody))
 	if err != nil {
-		panic(err)
+		fmt.Printf("OpenAIへのリクエスト生成エラー：%v\n", err)
 	}
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Authorization", "Bearer "+apiKey)
 	client := &http.Client{}
 	response, err := client.Do(request)
 	if err != nil {
-		panic(err)
+		fmt.Printf("OpenAIへのリクエスト投下時エラー：%v\n", err)
 	}
 	defer response.Body.Close()
 	responseBody, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		panic(err)
+		fmt.Printf("OpenAIからのレスポンス読み込みエラー：%v\n", err)
 	}
 	var data map[string]interface{}
 	err = json.Unmarshal(responseBody, &data)
 	if err != nil {
-		panic(err)
+		fmt.Printf("レスポンスボディのアンマーシャルエラー：%v\n", err)
 	}
+	if data == nil {
+		fmt.Printf("OpenAIからのレスポンスが空です：%v\n", data)
+	}
+	// デバッグ
+	// fmt.Printf("OpenAIからのレスポンスのdataです：%v\n", data)
 	text := data["choices"].([]interface{})[0].(map[string]interface{})["text"].(string)
-	fmt.Printf("作成されたQAです：%s", text)
+	// fmt.Printf("作成されたQAです：%s", text)
 
 	// AIから返されるQAのデータが「Q.」から質問部分が始まって、改行して「A.」から解答部分が始まって改行されているという前提
 	re := regexp.MustCompile(`Q\.(.*?)\nA\.(.*?)\n`)
