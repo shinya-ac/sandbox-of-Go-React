@@ -28,3 +28,9 @@ dist-ssr
 app/src/internal/sample_sql/*
 
 config.ini
+
+1q1a_service_account_key1.json
+./src/1q1a_service_account_key1.json
+./app/src/1q1a_service_account_key1.json
+
+./app/src/image.jpg
