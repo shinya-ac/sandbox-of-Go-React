@@ -1,4 +1,5 @@
 import { CreateQA } from "../components/Pages/CreateQA";
+import { ConfirmQA } from "../components/Pages/ConfirmQA"
 import { Home } from "../components/Pages/Home";
 import { Page404 } from "../components/Pages/Page404";
 import { Setting } from "../components/Pages/Setting";
@@ -10,9 +11,14 @@ export const HomeRoutes = [
         {path: "/",
         exact: true,
         children: <Home />},
-        {path: "/create_qa/:Id",
+        {path: "/create_qa/:folderId",
         exact: false,
         children: <CreateQA />},
+        {
+        path: "/confirm_qa/:folderId",
+        exact: false,
+        children: <ConfirmQA />
+        },
         {path: "/user_management",
         exact: false,
         children: <UserManagement />},
