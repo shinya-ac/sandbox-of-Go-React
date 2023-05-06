@@ -7,11 +7,11 @@ import (
 	"strings"
 
 	dbc "github.com/shinya-ac/1Q1A/dbconnection"
-	a "github.com/shinya-ac/1Q1A/internal/answer"
+	s "github.com/shinya-ac/1Q1A/internal/structure"
 )
 
 // TODO: ロールバック処理を書く
-func createQuestion(questions []Question, answers []a.Answer, userId int64, folderId int64) bool {
+func createQuestion(questions []s.Question, answers []s.Answer, userId int64, folderId int64) bool {
 	// データベースに接続
 	// db := dbc.ConnectDB()
 	// defer db.Close()
@@ -176,4 +176,65 @@ func ReadQuestions(userId int64, folderId int64) (*sql.Rows, error) {
 	}
 
 	return rows, nil
+}
+
+func registerQAs(payload s.RequestPayload, userId int64, folderId int64) bool {
+	db := dbc.ConnectDB()
+	defer db.Close()
+
+	// Start a transaction
+	tx, err := db.Begin()
+	if err != nil {
+		log.Fatalf("Error トランザクション処理開始時にエラー: %v", err)
+	}
+	defer tx.Rollback()
+
+	for _, qa := range payload.SelectedQAs {
+		question := qa.Question
+		answer := qa.Answer
+
+		// 質問登録クエリ
+		query := "INSERT INTO questions (question_content, user_id, folder_id) VALUES (?, ?, ?)"
+
+		stmt, err := tx.Prepare(query)
+		if err != nil {
+			log.Printf("SQL準備中にエラー: %v", err)
+			return false
+		}
+		defer stmt.Close()
+
+		// 質問登録SQLを実行し、セッションを保存
+		res, err := stmt.Exec(question.Content, userId, folderId)
+		if err != nil {
+			log.Printf("質問登録クエリ実行中にエラー: %v", err)
+			return false
+		}
+		lastInsertId, _ := res.LastInsertId()
+		log.Println("質問のインサート一件完了")
+
+		// 解答登録クエリ
+		answerQuery := "INSERT INTO answers (question_id, user_id, answer_content, folder_id) VALUES (?, ?, ?, ?)"
+		stmt, err = tx.Prepare(answerQuery)
+		if err != nil {
+			log.Printf("解答インサートSQL準備中にエラー: %v", err)
+			return false
+		}
+
+		_, err = stmt.Exec(lastInsertId, userId, answer.Content, folderId)
+		if err != nil {
+			log.Printf("解答インサートSQL実行中にエラー: %v", err)
+			return false
+		}
+		fmt.Println("質問、解答のインサート完了")
+	}
+
+	// Commit the transaction
+	err = tx.Commit()
+	if err != nil {
+		log.Printf("トランザクションのコミットに失敗: %v", err)
+		return false
+	}
+
+	return true
+
 }

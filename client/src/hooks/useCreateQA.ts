@@ -13,22 +13,20 @@ export const useCreateQA = () => {
     const [loading,  setLoading] = useState(false);
     const { showMessage } = useMessage();
 
-    const [questionContent, setQuestionContent] = useState<string>('');
-
     interface folderParams {
-        Id: string;
+        folderId: string;
       }
-    //TrialRoutes.tsxで「/:id」という名前でurlパラメーターを受け取っているので
-    //useParamsではidを受け取るような記述を書く
-    const { Id } = useParams<folderParams>();
+    //TrialRoutes.tsxで「/:folderParams」という名前でurlパラメーターを受け取っているので
+    //useParamsではfolderParamsを受け取るような記述を書く
+    const { folderId } = useParams<folderParams>();
     const location = useLocation();
     console.log(location)
-    console.log(Id)
+    console.log(folderId)
 
     const createQA = useCallback((Content: string) => {
         setLoading(true);
-        console.log(`フォルダーID：${Id}`)
-        const FolderId = parseInt(Id, 10)
+        console.log(`フォルダーID：${folderId}`)
+        const FolderId = parseInt(folderId, 10)
         const config = {
             headers: {
                 'FolderId': String(FolderId)
@@ -36,22 +34,23 @@ export const useCreateQA = () => {
             withCredentials: true
         };
 
-        axios.post<QA>("http://localhost:8080/question", { Content }, config)
+        axios.post<any>("http://localhost:8080/question", { Content }, config)
         .then((res) => {
             if (res.data){
-                setQuestionContent(res.data.question_content)
-                showMessage({title:"QAを作成しました", status:"success"});
-                history.push(`/folders/${FolderId}`);
+                console.log(res.data.questions[0])
+                const resQuestions = res.data.questions;
+                const resAnswers = res.data.answers;
+                showMessage({title:"問題と解答が自動で生成されました", status:"success"});
+                history.push({pathname: `/home/confirm_qa/${folderId}`,state: { resQuestions, resAnswers, folderId }});
             } else {
-                alert("QAを作成できませんでした");
+                alert("問題と解答を自動作成できませんでした");
                 setLoading(false);
             }
         })
         .catch(() => {
-            alert("QAを作成できませんでした")
+            alert("問題と解答を自動作成できませんでした")
             setLoading(false)
         })
-        
-    }, [history, showMessage, setQuestionContent]);
+    }, [history, showMessage]);
     return { createQA, loading }
 }

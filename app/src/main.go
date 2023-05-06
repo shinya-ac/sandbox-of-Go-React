@@ -147,8 +147,11 @@ func main() {
 	//authというログインを確認するミドルウェアを噛ませている
 	http.HandleFunc("/isAuthorized", auth(isAuthorized))
 
-	// 質問作成エンドポイント（RESTにするかどうか検討中）
+	// 質問作成エンドポイント（DBへの登録はしない）（RESTにするかどうか検討中）
 	http.HandleFunc("/question", auth(q.QuestionHandler))
+
+	// 質問と回答登録エンドポイント（RESTにするかどうか検討中）
+	http.HandleFunc("/registerQA", auth(q.RegisterHander))
 
 	// フォルダー作成エンドポイント（RESTにするかどうか検討中）
 	http.HandleFunc("/folder", auth(f.FolderHandler))
