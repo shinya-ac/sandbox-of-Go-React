@@ -1,4 +1,4 @@
-import { Box, Center, Flex, Spacer, Spinner, Wrap, WrapItem } from "@chakra-ui/react";
+import { Center, Spinner, Wrap, WrapItem } from "@chakra-ui/react";
 import { memo, useEffect } from "react"
 import { FolderIcon } from "../atoms/buttons/FileIcon";
 import { useAllFolders } from "../../hooks/useAllFolders";

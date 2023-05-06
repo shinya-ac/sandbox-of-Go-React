@@ -9,13 +9,3 @@ export type QA = {
     // answers:Answer[],
 };
 
-export type Answer = {
-    id: number | null;
-    aid: number,
-    answer_content: string,
-}
-
-export type Question = {
-    qid: number,
-    question_content: string,
-}
